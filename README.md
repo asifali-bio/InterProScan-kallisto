@@ -1,0 +1,1 @@
+For de novo RNA-seq analysis, Trinity can assemble reads. Then, we can apply InterProScan as well as kallisto to the Trinity files. Once we have the output files, we can combine the GO/Pfam factors with abundance information. This R code assumes that both InterProScan and kallisto output files are ready to be processed.
