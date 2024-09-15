@@ -1,1 +1,5 @@
-For de novo RNA-seq analysis, Trinity can assemble reads. Then, we can apply InterProScan as well as kallisto to the Trinity files. Once we have the output files, we can combine the GO/Pfam factors with abundance information. This R code assumes that both InterProScan and kallisto output files are ready to be processed.
+For de novo RNA-seq analysis, Trinity was used to assemble reads. Then, we applied InterProScan as well as kallisto to each Trinity file. Once we have the output files from InterproScan and kallisto, we combine the GO/Pfam factors with abundance information in R. The R code contained in this repository assumes that both InterProScan and kallisto output files are ready to be processed and used as input files.
+
+In theory, we should be able to perform RNA-seq analysis across different species. This method treats evolutionary time as a treatment condition. As such, there is no normalization step. Normalization would assume that most homologs are not differentially expressed and that total gene expression is equal across species. Keep in mind that read counts measure relative abundance per sample, not absolute abundance.
+
+An analogue sequence similarity algorithm has been developed and will be implemented in future updates.
