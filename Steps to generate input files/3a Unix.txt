@@ -1,0 +1,6 @@
+cat *tsv > all.tsv
+
+
+~
+
+Merge all TSV files created by parallel processing job after navigating to a single folder.

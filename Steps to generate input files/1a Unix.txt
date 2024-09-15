@@ -1,0 +1,18 @@
+module purge
+module load sra-tools/intel/2.9.6
+#SRA dump for ABIJ
+fastq-dump ERS1829938
+#single fastq
+fastq-dump --defline-seq '@$sn[_$rn]/$ri' --split-files ERS1829938
+#forward and reverse fastq as independent
+
+module purge
+module load fastqc/0.11.7
+fastqc ABIJ.fastq
+#very high quality data
+#no adapter sequences found
+
+
+~
+
+Download raw RNA-seq reads from SRA database, each sample split into two independent FASTQ files. Run FastQC on raw RNA-seq reads.
