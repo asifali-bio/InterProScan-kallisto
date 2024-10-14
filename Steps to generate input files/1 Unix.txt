@@ -11,8 +11,3 @@ module load fastqc/0.11.7
 fastqc ABIJ.fastq
 #very high quality data
 #no adapter sequences found
-
-
-~
-
-Download raw RNA-seq reads from SRA database, each sample split into two independent FASTQ files. Run FastQC on raw RNA-seq reads.
