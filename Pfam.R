@@ -1,119 +1,130 @@
 library(ggplot2)
 library(plotly)
 library(plyr)
-
-annotation = read.delim("ABIJ.tsv", header=F)
-head(annotation)
-annotation2 = read.delim("JKAA.tsv", header=F)
-annotation3 = read.delim("KJYC.tsv", header=F)
-annotation4 = read.delim("KUXM.tsv", header=F)
-annotation5 = read.delim("LGDQ.tsv", header=F)
-annotation6 = read.delim("ZFGK.tsv", header=F)
-annotation7 = read.delim("ZYCD.tsv", header=F)
-annotation8 = read.delim("ZZOL.tsv", header=F)
+library(dplyr)
 
 
-#part A
-justGeneP<-annotation8[,c(1,5)]
-justGeneTPM<-ZZOL.abundance[,c(1,5)]
+#make a list of sample names in CSV format via Excel
+specieslist = read.csv("specieslist.csv", header = F)
+numberofspecies = nrow(specieslist)
 
-colnames(justGeneP) <- c("gene_id","pfam") 
+abundancelist = paste0("abundance", 1:numberofspecies, ".tsv")
+abundancefiles = lapply(abundancelist, read.delim)
+#abundance1 = as.data.frame(abundancefiles[1])
 
-a<-gsub("(.*)_.*","\\1",justGeneP$gene_id)
-justGeneP$gene_id <- a
-
-
-colnames(justGeneP)[colnames(justGeneP)=="gene_id"] <- "target_id"
-Data2 = merge(justGeneP, justGeneTPM)
-Data2 <- Data2[c(2,3)]
-#just pfam and TPM
-Data2 = ddply(Data2, "pfam", numcolwise(sum))
-#sum tpm values
-
-Data3 = Data2
-
-colnames(Data3)[colnames(Data3)=="tpm"] <- "stauntoniana"
-Data2$newcolumn <- "stauntoniana"
-#label
+annotationlist = paste0("annotation", 1:numberofspecies, ".tsv")
+annotationfiles = lapply(annotationlist, read.delim, header=F)
+#annotation1 = as.data.frame(annotationfiles[1])
 
 
-#Selaginella lepidophylla (ABIJ)
-#Selaginella wallacei (JKAA)
-#Selaginella willdenowii (KJYC)
-#Selaginella selaginoides (KUXM)
-#Selaginella apoda (LGDQ)
-#Selaginella kraussiana (ZFGK)
-#Selaginella acanthonota (ZYCD)
-#Selaginella stauntoniana (ZZOL)
-#new2 = Data3
-new2 = merge.data.frame(new2, Data3, all = TRUE)
+for (i in seq(1:numberofspecies)) {
+  
+  justGeneP<-as.data.frame(annotationfiles[i])[,c(1,5)]
+  justGeneTPM<-as.data.frame(abundancefiles[i])[,c(1,5)]
+  
+  colnames(justGeneP) <- c("gene_id","pfam") 
+  
+  a<-gsub("(.*)_.*","\\1",justGeneP$gene_id)
+  justGeneP$gene_id <- a
+  
+  colnames(justGeneP)[colnames(justGeneP)=="gene_id"] <- "target_id"
+  Data2 = merge(justGeneP, justGeneTPM)
+  Data2 <- Data2[c(2,3)]
+  #just pfam and TPM
+  Data2 = ddply(Data2, "pfam", numcolwise(sum))
+  #sum tpm values
+  
+  Data3 = Data2
+  
+  colnames(Data3)[colnames(Data3)=="tpm"] <- specieslist[i,]
+  Data2$newcolumn <- specieslist[i,]
+  #label
+  
+  if (i==1) {
+    new2 = Data3
+    new = Data2
+    #initialize data
+  }
+  else {
+    new2 = merge.data.frame(new2, Data3, all = TRUE)
+    new = rbind(new, Data2)
+    #combine all data
+  }
+}
 
 
-#new = Data2
-new = rbind(new, Data2)
-#combine all data
-
-
-p = plot_ly(x = new$pfam, y = new$tpm, type = "scatter", mode = "markers", color = new$newcolumn, size = new$tpm, colors = "Spectral")
-
-p
-
-
-p1 = plot_ly(x = new$newcolumn, y = new$pfam, type = "scatter", mode = "markers", color = new$pfam, size = new$tpm, colors = "Spectral")
+p1 = plot_ly(x = new$newcolumn, y = new$pfam, type = "scatter", mode = "markers", color = new$newcolumn, size = new$tpm, fill = ~'', colors = "Spectral")
+p1 <- p1 %>% layout(showlegend = FALSE)
 
 p1
 
 
 
-#part B
-a = new2[is.na(new2$wallacei) & is.na(new2$willdenowii) & is.na(new2$selaginoides) & is.na(new2$apoda) & is.na(new2$kraussiana) & is.na(new2$acanthonota) & is.na(new2$stauntoniana),]
-b = new2[is.na(new2$lepidophylla) & is.na(new2$willdenowii) & is.na(new2$selaginoides) & is.na(new2$apoda) & is.na(new2$kraussiana) & is.na(new2$acanthonota) & is.na(new2$stauntoniana),]
-c = new2[is.na(new2$wallacei) & is.na(new2$lepidophylla) & is.na(new2$selaginoides) & is.na(new2$apoda) & is.na(new2$kraussiana) & is.na(new2$acanthonota) & is.na(new2$stauntoniana),]
-d = new2[is.na(new2$wallacei) & is.na(new2$willdenowii) & is.na(new2$lepidophylla) & is.na(new2$apoda) & is.na(new2$kraussiana) & is.na(new2$acanthonota) & is.na(new2$stauntoniana),]
-e = new2[is.na(new2$wallacei) & is.na(new2$willdenowii) & is.na(new2$selaginoides) & is.na(new2$lepidophylla) & is.na(new2$kraussiana) & is.na(new2$acanthonota) & is.na(new2$stauntoniana),]
-f = new2[is.na(new2$wallacei) & is.na(new2$willdenowii) & is.na(new2$selaginoides) & is.na(new2$apoda) & is.na(new2$lepidophylla) & is.na(new2$acanthonota) & is.na(new2$stauntoniana),]
-g = new2[is.na(new2$wallacei) & is.na(new2$willdenowii) & is.na(new2$selaginoides) & is.na(new2$apoda) & is.na(new2$kraussiana) & is.na(new2$lepidophylla) & is.na(new2$stauntoniana),]
-h = new2[is.na(new2$wallacei) & is.na(new2$willdenowii) & is.na(new2$selaginoides) & is.na(new2$apoda) & is.na(new2$kraussiana) & is.na(new2$acanthonota) & is.na(new2$lepidophylla),]
+#Part B
+
+uniquepfam = setNames(
+  lapply(names(new2[,-1]), \(x)
+         filter(new2, if_all(setdiff(names(new2[,-1]), x), ~is.na(.)))),
+  names(new2[,-1]))
+
+#a=as.data.frame(uniquepfam[1])
 #unique protein domains
 
-
-annotation <- annotation[which(annotation$V9 < 0.001),]
-annotation2 <- annotation2[which(annotation2$V9 < 0.001),]
-annotation3 <- annotation3[which(annotation3$V9 < 0.001),]
-annotation4 <- annotation4[which(annotation4$V9 < 0.001),]
-annotation5 <- annotation5[which(annotation5$V9 < 0.001),]
-annotation6 <- annotation6[which(annotation6$V9 < 0.001),]
-annotation7 <- annotation7[which(annotation7$V9 < 0.001),]
-annotation8 <- annotation8[which(annotation8$V9 < 0.001),]
+#annotation = as.data.frame(annotationfiles[1])[which(as.data.frame(annotationfiles[1])$V9 < 0.001),]
 #filter by e-value
 
+finalannotationlist <- list()
+finaltranscriptlist <- list()
 
-trinity = c()
-annot = c()
-
-a5 = dim(a)[1]
-#change letter according to sample
-
-for (i in seq(1:a5)) {
-  a3 = a[i,1]
-  a1 = grepl(a3, annotation$V5)
-  #change annotation variable according to sample
-  a2 = which(a1)
-  a4 = as.character(annotation[a2,1])
-  #change annotation variable according to sample
-  a5 = as.character(annotation[a2,5])
-  #change annotation variable according to sample
-  trinity = c(trinity, a4)
-  annot = c(annot, a5)
+for (i in seq(1:numberofspecies)) {
+  a=as.data.frame(uniquepfam[i])
+  annotation = as.data.frame(annotationfiles[i])[which(as.data.frame(annotationfiles[i])$V9 < 0.001),]
+  
+  trinity = c()
+  annot = c()
+  
+  a5 = dim(a)[1]
+  #change letter according to sample
+  
+  for (j in seq(1:a5)) {
+    a3 = a[j,1]
+    #grab first unique protein domain entry
+    a1 = grepl(a3, annotation$V5)
+    a2 = which(a1)
+    #grab position of unique protein domain in filtered data
+    a4 = as.character(annotation[a2,1])
+    #extract transcript ID
+    a5 = as.character(annotation[a2,5])
+    #extract Pfam protein domain ID
+    trinity = c(trinity, a4)
+    #build data frame of transcripts with unique protein domains filtered by E-value
+    annot = c(annot, a5)
+    #build data frame of unique protein domains filtered by E-value
+  }
+  
+  annot = as.data.frame(annot)
+  annot2 = unique(annot)
+  #unique protein domains
+  colnames(annot2) = specieslist[i,]
+  #label species
+  
+  trinity = as.data.frame(trinity)
+  clean <- gsub("(.*)_.*","\\1",trinity$trinity)
+  trinity$trinity <- clean
+  #remove tail end of transcript label
+  trinity2 = unique(trinity)
+  #unique transcripts
+  colnames(trinity2) = specieslist[i,]
+  #label species
+  
+  #create a list of annotations and transcripts for each species
+  finalannotationlist[specieslist[i,]] <- list(annot2)
+  finaltranscriptlist[specieslist[i,]] <- list(trinity2)
 }
 
-annot = as.data.frame(annot)
 
-trinity = as.data.frame(trinity)
-clean <- gsub("(.*)_.*","\\1",trinity$trinity)
-trinity$trinity <- clean
-trinity2 = unique(trinity)
+#a = as.data.frame(finalannotationlist[1])
+#b = as.data.frame(finaltranscriptlist[1])
 
 
 
-#Similar to the previous step, we merge the protein domain annotations by InterProScan via Pfam with quantitative information at the gene-level by kallisto. We plot the data. We then fetch the transcripts associated with the species-specific Pfam protein domains filtered by E-value.
