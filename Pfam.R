@@ -64,6 +64,7 @@ for (i in seq(1:numberofspecies)) {
     new = rbind(new, Data2)
     #combine all data
   }
+  rm(a, justGeneP, justGeneTPM, Data2, Data3)
 }
 
 #table of pooled protein domains per species filtered by e-value
@@ -121,23 +122,25 @@ for (i in seq(1:numberofspecies)) {
   }
   
   annotation = as.data.frame(annotation)
-  annotation2 = unique(annotation)
+  annotation = unique(annotation)
   #unique protein domains
-  colnames(annotation2) = specieslist[i,]
+  colnames(annotation) = specieslist[i,]
   #label species
   
   trinity = as.data.frame(trinity)
   clean <- gsub("(.*)_.*","\\1",trinity$trinity)
   trinity$trinity <- clean
   #remove tail end of transcript label
-  trinity2 = unique(trinity)
+  trinity = unique(trinity)
   #unique transcripts
-  colnames(trinity2) = specieslist[i,]
+  colnames(trinity) = specieslist[i,]
   #label species
   
   #create a list of annotations and transcripts for each species
-  finalannotationlist[specieslist[i,]] <- list(annotation2)
-  finaltranscriptlist[specieslist[i,]] <- list(trinity2)
+  finalannotationlist[specieslist[i,]] <- list(annotation)
+  finaltranscriptlist[specieslist[i,]] <- list(trinity)
+  
+  rm(a, a1, a2, a3, a4, a5, clean, filteredannotation, annotation, trinity)
 }
 
 
@@ -149,4 +152,3 @@ finalannotationlist[[1]]
 
 finaltranscriptlist[[1]]
 #transcripts with unique protein domains filtered by e-value
-
