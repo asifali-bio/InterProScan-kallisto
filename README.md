@@ -7,4 +7,4 @@ The main purpose of this method is to identify transcripts with a unique protein
 An analogue sequence similarity algorithm has been developed and will be implemented in future updates.
 
 
-To run the function, name the abundance and annotation input files in a similar format as well as the species list CSV file. In R, set the working directory to the same location as the input files. Run the code line-by-line.
+To run the function, name the abundance and annotation input files in a similar format as well as the species list CSV file. In R, set the working directory to the same location as the input files. Run the code line by line.
