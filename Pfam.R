@@ -17,12 +17,12 @@ annotationlist = paste0("annotation", 1:numberofspecies, ".tsv")
 annotationfiles = lapply(annotationlist, read.delim, header=F)
 
 #set e-value threshold for Pfam protein domain match
-evalue = 0.001
+evalue = 0
 
 #filter annotation files by e-value
 filteredannotationfiles <- list()
 for (i in seq(1:numberofspecies)) {
-  filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 < evalue),]
+  filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 >= evalue),]
   filteredannotationfiles[specieslist[i,]] <- list(filteredannotation)
 }
 
@@ -67,14 +67,33 @@ for (i in seq(1:numberofspecies)) {
   rm(a, justGeneP, justGeneTPM, Data2, Data3)
 }
 
-#table of pooled protein domains per species filtered by e-value
-new2
+#table of pooled Pfam protein domains per species filtered by e-value
+save(new, new2, file = "Pfam.RData")
+
+load("Pfam.RData")
+ggplot(new, aes(species, pfam)) +
+  geom_point(aes(color = pfam, size = tpm), alpha = 0.3, show.legend = FALSE) +
+  theme_classic() +
+  labs(title = element_blank(), x = "Species", y = "Pfam") +
+  scale_fill_gradientn(colours = rainbow(nrow(new2))) +
+  theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
 
 #plot of pooled protein domains per species filtered by e-value
 p1 = plot_ly(x = new$species, y = new$pfam, type = "scatter", mode = "markers", color = new$species, size = new$tpm, fill = ~'', colors = "Spectral")
-p1 <- p1 %>% layout(showlegend = FALSE)
+p1 <- p1 %>% layout(title = "InterProScan x kallisto",
+                    xaxis = list(title = "Species"),
+                    yaxis = list(title = "Pfam", showticklabels = FALSE),
+                    showlegend = FALSE)
 
 p1
+
+
+p2 = plot_ly(x = new$species, y = new$pfam, type = "scatter", mode = "markers", color = new$species, size = new$tpm, fill = ~'', colors = "Spectral")
+p2 <- p2 %>% layout(title = "InterProScan x kallisto",
+                    xaxis = list(title = "Species", showticklabels = FALSE),
+                    yaxis = list(title = "Pfam", showticklabels = FALSE))
+
+p2
 
 
 
@@ -92,8 +111,9 @@ uniquepfam[[1]]
 #cycle species by changing the number within double brackets
 
 
-finalannotationlist <- list()
-finaltranscriptlist <- list()
+ssannotations <- list()
+ssisoforms <- list()
+sstranscripts <- list()
 
 for (i in seq(1:numberofspecies)) {
   a=uniquepfam[[i]]
@@ -128,6 +148,9 @@ for (i in seq(1:numberofspecies)) {
   #label species
   
   trinity = as.data.frame(trinity)
+  
+  trinity2 = trinity
+  
   clean <- gsub("(.*)_.*","\\1",trinity$trinity)
   trinity$trinity <- clean
   #remove tail end of transcript label
@@ -136,19 +159,42 @@ for (i in seq(1:numberofspecies)) {
   colnames(trinity) = specieslist[i,]
   #label species
   
+  clean <- gsub("(.*)_.*","\\1",trinity2$trinity)
+  trinity2$trinity <- clean
+  clean2 <- gsub("(.*)_.*","\\1",trinity2$trinity)
+  #remove isoform tag
+  trinity2$trinity <- clean2
+  trinity2 = unique(trinity2)
+  colnames(trinity2) = specieslist[i,]
+  
   #create a list of annotations and transcripts for each species
-  finalannotationlist[specieslist[i,]] <- list(annotation)
-  finaltranscriptlist[specieslist[i,]] <- list(trinity)
+  ssannotations[specieslist[i,]] <- list(annotation)
+  ssisoforms[specieslist[i,]] <- list(trinity)
+  sstranscripts[specieslist[i,]] <- list(trinity2)
+  
   
   rm(a, a1, a2, a3, a4, a5, clean, filteredannotation, annotation, trinity)
 }
 
 
-#access species-specific information
+#species-specific information
 #cycle species by changing the number within double brackets
 
-finalannotationlist[[1]]
+ssannotations[[1]]
 #unique protein domains filtered by e-value
 
-finaltranscriptlist[[1]]
-#transcripts with unique protein domains filtered by e-value
+ssisoforms[[1]]
+#transcript isoforms with unique protein domains filtered by e-value
+
+sstranscripts[[1]]
+#source genes of transcript isoforms with unique protein domains filtered by e-value
+
+#set working directory to new folder
+for (i in seq(1:numberofspecies)) {
+  write.table(ssannotations[[i]], file = paste0(specieslist[i,], "_p.txt"), col.names = FALSE)
+  write.table(ssisoforms[[i]], file = paste0(specieslist[i,], "_i.txt"), col.names = FALSE)
+  write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
+}
+#species-specific Pfam protein domains
+#species-specific transcript isoforms
+#species-specific genes
