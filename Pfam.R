@@ -32,21 +32,22 @@ filteredannotationfiles[[1]]
 
 for (i in seq(1:numberofspecies)) {
   
-  #filter Pfam protein domain annotations by e-value
+  #extract Pfam protein domain annotations filtered by e-value
   justGeneP<-filteredannotationfiles[[i]][,c(1,5)]
   justGeneTPM<-abundancefiles[[i]][,c(1,5)]
   
   colnames(justGeneP) <- c("gene_id","pfam") 
   
+  #remove tail end of transcript label
   a<-gsub("(.*)_.*","\\1",justGeneP$gene_id)
   justGeneP$gene_id <- a
   
   colnames(justGeneP)[colnames(justGeneP)=="gene_id"] <- "target_id"
   Data2 = merge(justGeneP, justGeneTPM)
   Data2 <- Data2[c(2,3)]
-  #just pfam and TPM
+  #just Pfam and TPM
   Data2 = ddply(Data2, "pfam", numcolwise(sum))
-  #sum tpm values
+  #sum TPM values
   
   Data3 = Data2
   
@@ -74,7 +75,7 @@ load("Pfam.RData")
 ggplot(new, aes(species, pfam)) +
   geom_point(aes(color = pfam, size = tpm), alpha = 0.3, show.legend = FALSE) +
   theme_classic() +
-  labs(title = element_blank(), x = "Species", y = "Pfam") +
+  labs(title = "Derived Pfam protein domain distributions across species", x = "Species", y = "Pfam") +
   scale_fill_gradientn(colours = rainbow(nrow(new2))) +
   theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
 
@@ -130,7 +131,7 @@ for (i in seq(1:numberofspecies)) {
     #grab first unique protein domain entry
     a1 = grepl(a3, filteredannotation$V5)
     a2 = which(a1)
-    #grab position of unique protein domain in filtered data
+    #locate position of unique protein domain in filtered data
     a4 = as.character(filteredannotation[a2,1])
     #extract transcript ID
     a5 = as.character(filteredannotation[a2,5])
@@ -148,7 +149,6 @@ for (i in seq(1:numberofspecies)) {
   #label species
   
   trinity = as.data.frame(trinity)
-  
   trinity2 = trinity
   
   clean <- gsub("(.*)_.*","\\1",trinity$trinity)
@@ -173,7 +173,7 @@ for (i in seq(1:numberofspecies)) {
   sstranscripts[specieslist[i,]] <- list(trinity2)
   
   
-  rm(a, a1, a2, a3, a4, a5, clean, filteredannotation, annotation, trinity)
+  rm(a, a1, a2, a3, a4, a5, clean, clean2, filteredannotation, annotation, trinity, trinity2)
 }
 
 
@@ -191,9 +191,10 @@ sstranscripts[[1]]
 
 #set working directory to new folder
 for (i in seq(1:numberofspecies)) {
-  write.table(ssannotations[[i]], file = paste0(specieslist[i,], "_p.txt"), col.names = FALSE)
+  write.table(ssannotations[[i]], file = paste0(specieslist[i,], "_Pfam.txt"), col.names = FALSE)
   write.table(ssisoforms[[i]], file = paste0(specieslist[i,], "_i.txt"), col.names = FALSE)
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
+  #save
 }
 #species-specific Pfam protein domains
 #species-specific transcript isoforms
