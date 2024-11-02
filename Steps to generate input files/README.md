@@ -1,3 +1,5 @@
+Trinity output files available in folder. Zip and 7z format.
+
 1: On Unix, download raw RNA-seq reads from SRA database, each sample split into two independent FASTQ files. Run FastQC on raw RNA-seq reads.
 
 2: Assemble transcriptome via Trinity on HPC.

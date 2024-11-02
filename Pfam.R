@@ -16,10 +16,10 @@ abundancefiles = lapply(abundancelist, read.delim)
 annotationlist = paste0("annotation", 1:numberofspecies, ".tsv")
 annotationfiles = lapply(annotationlist, read.delim, header=F)
 
-#set e-value threshold for Pfam protein domain match
+#set e-value for Pfam protein domain match
 evalue = 0
 
-#filter annotation files by e-value
+#remove Pfam protein domain annotations less than or equal to e-value
 filteredannotationfiles <- list()
 for (i in seq(1:numberofspecies)) {
   filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 >= evalue),]
@@ -36,7 +36,8 @@ for (i in seq(1:numberofspecies)) {
   justGeneP<-filteredannotationfiles[[i]][,c(1,5)]
   justGeneTPM<-abundancefiles[[i]][,c(1,5)]
   
-  colnames(justGeneP) <- c("gene_id","pfam") 
+  colnames(justGeneP) <- c("gene_id","pfam")
+  justGeneP$pfam = as.factor(justGeneP$pfam)
   
   #remove tail end of transcript label
   a<-gsub("(.*)_.*","\\1",justGeneP$gene_id)

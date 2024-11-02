@@ -43,7 +43,7 @@ for (i in seq(1:numberofspecies)) {
       }
     }
   }
-  
+  go_id = as.factor(go_id)
   Data = data.frame(go_id, gene_id)
   
   #remove tail end of transcript label
@@ -76,7 +76,7 @@ for (i in seq(1:numberofspecies)) {
   rm(a, eachgene, eachgo, gene, go, gene_id, go_id, simple_counter, justGeneGo, justGeneTPM, Data, Data2, Data3)
 }
 
-#table of pooled Pfam protein domains per species filtered by e-value
+#table of pooled GO terms per species
 save(new, new2, file = "GO.RData")
 
 load("GO.RData")
