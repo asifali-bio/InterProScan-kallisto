@@ -5,7 +5,7 @@ library(plotly)
 library(viridis)
 
 
-#read CSV containing list of sample/species names
+#read CSV file containing list of sample/species names
 specieslist = read.csv("specieslist.csv", header = F)
 numberofspecies = nrow(specieslist)
 
@@ -72,8 +72,17 @@ for (i in seq(1:numberofspecies)) {
 
 #table of pooled Pfam protein domains per species filtered by e-value
 save(new, new2, file = "Pfam.RData")
-
 load("Pfam.RData")
+
+#calculate standard score
+new3 = scale(new2[,-1])
+new3 = as.list(new3)
+new3[is.na(new3)] <- NULL
+for (i in seq(1:nrow(new))) {
+  new[i,2] = new3[i]
+}
+
+#preview plot
 ggplot(new, aes(species, pfam)) +
   geom_point(aes(color = pfam, size = tpm), alpha = 0.3, show.legend = FALSE) +
   theme_classic() +

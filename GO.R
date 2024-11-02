@@ -5,7 +5,7 @@ library(plotly)
 library(viridis)
 
 
-#read CSV containing list of sample/species names
+#read CSV file containing list of sample/species names
 specieslist = read.csv("specieslist.csv", header = F)
 numberofspecies = nrow(specieslist)
 
@@ -80,8 +80,17 @@ for (i in seq(1:numberofspecies)) {
 
 #table of pooled GO terms per species
 save(new, new2, file = "GO.RData")
-
 load("GO.RData")
+
+#calculate standard score
+new3 = scale(new2[,-1])
+new3 = as.list(new3)
+new3[is.na(new3)] <- NULL
+for (i in seq(1:nrow(new))) {
+  new[i,2] = new3[i]
+}
+
+#preview plot
 ggplot(new, aes(species, go_id)) +
   geom_point(aes(color = go_id, size = tpm), alpha = 0.3, show.legend = FALSE) +
   theme_classic() +
