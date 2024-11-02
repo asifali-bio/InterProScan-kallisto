@@ -74,13 +74,14 @@ for (i in seq(1:numberofspecies)) {
 save(new, new2, file = "Pfam.RData")
 load("Pfam.RData")
 
-#calculate standard score
-new3 = scale(new2[,-1])
-new3 = as.list(new3)
-new3[is.na(new3)] <- NULL
-for (i in seq(1:nrow(new))) {
-  new[i,2] = new3[i]
-}
+#calculate standard score for heatmap
+#new3 = t(scale(t(new2[,-1])))
+#new3[is.nan(new3)] <- 0
+#new3 = as.list(new3)
+#new3[is.na(new3)] <- NULL
+#for (i in seq(1:nrow(new))) {
+#  new[i,2] = new3[i]
+#}
 
 #preview plot
 ggplot(new, aes(species, pfam)) +
