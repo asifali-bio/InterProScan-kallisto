@@ -1,7 +1,8 @@
-library(ggplot2)
-library(plotly)
 library(plyr)
 library(dplyr)
+library(ggplot2)
+library(plotly)
+library(viridis)
 
 
 #read CSV containing list of sample/species names
@@ -31,7 +32,7 @@ for (i in seq(1:numberofspecies)) {
   for (j in 1:nrow(justGeneGo)) {
     gene=as.character(justGeneGo[j,1])
     
-    #multiple GO-terms are delimited "|"
+    #multiple GO terms are delimited "|"
     go=unlist(strsplit(as.character(justGeneGo[j,2]),"|", fixed=T))
     
     
@@ -43,6 +44,7 @@ for (i in seq(1:numberofspecies)) {
       }
     }
   }
+  
   go_id = as.factor(go_id)
   Data = data.frame(go_id, gene_id)
   
@@ -93,7 +95,7 @@ p1 <- p1 %>% layout(title = "InterProScan x kallisto",
                     xaxis = list(title = "Species"),
                     yaxis = list(title = "GO", showticklabels = FALSE),
                     showlegend = FALSE)
-
+#color by species
 p1
 
 
@@ -101,8 +103,17 @@ p2 = plot_ly(x = new$species, y = new$go_id, type = "scatter", mode = "markers",
 p2 <- p2 %>% layout(title = "InterProScan x kallisto",
                     xaxis = list(title = "Species", showticklabels = FALSE),
                     yaxis = list(title = "GO", showticklabels = FALSE))
-
+#color by species
 p2
+
+
+p3 = plot_ly(x = new$species, y = new$go_id, type = "scatter", mode = "markers", color = new$go_id, size = new$tpm, fill = ~'', colors = viridis(nrow(new2), direction = -1))
+p3 <- p3 %>% layout(title = "InterProScan x kallisto",
+                    xaxis = list(title = "Species"),
+                    yaxis = list(title = "GO", showticklabels = FALSE),
+                    showlegend = FALSE)
+#color by annotation
+p3
 
 
 

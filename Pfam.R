@@ -1,7 +1,8 @@
-library(ggplot2)
-library(plotly)
 library(plyr)
 library(dplyr)
+library(ggplot2)
+library(plotly)
+library(viridis)
 
 
 #read CSV containing list of sample/species names
@@ -80,13 +81,13 @@ ggplot(new, aes(species, pfam)) +
   scale_fill_gradientn(colours = rainbow(nrow(new2))) +
   theme(axis.text.y=element_blank(), axis.ticks.y=element_blank())
 
-#plot of pooled protein domains per species filtered by e-value
+#plot of pooled Pfam protein domains per species filtered by e-value
 p1 = plot_ly(x = new$species, y = new$pfam, type = "scatter", mode = "markers", color = new$species, size = new$tpm, fill = ~'', colors = "Spectral")
 p1 <- p1 %>% layout(title = "InterProScan x kallisto",
                     xaxis = list(title = "Species"),
                     yaxis = list(title = "Pfam", showticklabels = FALSE),
                     showlegend = FALSE)
-
+#color by species
 p1
 
 
@@ -94,8 +95,17 @@ p2 = plot_ly(x = new$species, y = new$pfam, type = "scatter", mode = "markers", 
 p2 <- p2 %>% layout(title = "InterProScan x kallisto",
                     xaxis = list(title = "Species", showticklabels = FALSE),
                     yaxis = list(title = "Pfam", showticklabels = FALSE))
-
+#color by species
 p2
+
+
+p3 = plot_ly(x = new$species, y = new$pfam, type = "scatter", mode = "markers", color = new$pfam, size = new$tpm, fill = ~'', colors = viridis(nrow(new2), direction = -1))
+p3 <- p3 %>% layout(title = "InterProScan x kallisto",
+                    xaxis = list(title = "Species"),
+                    yaxis = list(title = "Pfam", showticklabels = FALSE),
+                    showlegend = FALSE)
+#color by annotation
+p3
 
 
 
