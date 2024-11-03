@@ -1,5 +1,6 @@
 library(plyr)
 library(dplyr)
+library(pheatmap)
 library(ggplot2)
 library(plotly)
 library(viridis)
@@ -82,14 +83,10 @@ for (i in seq(1:numberofspecies)) {
 save(new, new2, file = "GO.RData")
 load("GO.RData")
 
-#calculate standard score for heatmap
-#new3 = t(scale(t(new2[,-1])))
-#new3[is.nan(new3)] <- 0
-#new3 = as.list(new3)
-#new3[is.na(new3)] <- NULL
-#for (i in seq(1:nrow(new))) {
-#  new[i,2] = new3[i]
-#}
+#automatic scaling
+new3 = as.matrix(new2[,-1])
+new3 = new3[complete.cases(new3), ]
+pheatmap(new3, color = colorRampPalette(c("navy", "white", "firebrick3"))(100), scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)
 
 #preview plot
 ggplot(new, aes(species, go_id)) +
