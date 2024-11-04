@@ -35,10 +35,10 @@ filteredannotationfiles[[1]]
 for (i in seq(1:numberofspecies)) {
   
   #extract Pfam protein domain annotations filtered by e-value
-  justGeneP<-filteredannotationfiles[[i]][,c(1,5)]
+  justGeneP<-filteredannotationfiles[[i]][,c(1,5,6)]
   justGeneTPM<-abundancefiles[[i]][,c(1,5)]
   
-  colnames(justGeneP) <- c("gene_id","pfam")
+  colnames(justGeneP) <- c("gene_id","pfam","domain")
   justGeneP$pfam = as.factor(justGeneP$pfam)
   
   #remove tail end of transcript label
@@ -47,9 +47,9 @@ for (i in seq(1:numberofspecies)) {
   
   colnames(justGeneP)[colnames(justGeneP)=="gene_id"] <- "target_id"
   Data2 = merge(justGeneP, justGeneTPM)
-  Data2 <- Data2[c(2,3)]
+  Data2 <- Data2[c(2,3,4)]
   #just Pfam and TPM
-  Data2 = ddply(Data2, "pfam", numcolwise(sum))
+  Data2 = ddply(Data2, c("pfam","domain"), numcolwise(sum))
   #sum TPM values
   
   Data3 = Data2
@@ -76,7 +76,7 @@ save(new, new2, file = "Pfam.RData")
 load("Pfam.RData")
 
 #automatic scaling
-new3 = as.matrix(new2[,-1])
+new3 = as.matrix(new2[,-c(1,2)])
 new3 = new3[complete.cases(new3), ]
 pheatmap(new3, color = colorRampPalette(c("navy", "white", "firebrick3"))(100), scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)
 
@@ -119,15 +119,18 @@ p3
 #Part B
 
 uniquepfam = setNames(
-  lapply(names(new2[,-1]), \(x)
-         filter(new2, if_all(setdiff(names(new2[,-1]), x), ~is.na(.)))),
-  names(new2[,-1]))
+  lapply(names(new2[,-c(1,2)]), \(x)
+         filter(new2, if_all(setdiff(names(new2[,-c(1,2)]), x), ~is.na(.)))),
+  names(new2[,-c(1,2)]))
 
-#unique protein domains per species
-#corresponding pooled TPM included
-#filtered by e-value
-uniquepfam[[1]]
+#unique protein domains per species filtered by e-value with pooled TPM
+for (i in seq(1:numberofspecies)) {
+  #remove NA columns
+  uniquepfam[[i]] <- uniquepfam[[i]][,c(1,2,2+i)]
+}
+
 #cycle species by changing the number within double brackets
+uniquepfam[[1]]
 
 
 ssannotations <- list()
@@ -135,17 +138,16 @@ ssisoforms <- list()
 sstranscripts <- list()
 
 for (i in seq(1:numberofspecies)) {
-  a=uniquepfam[[i]]
   filteredannotation = filteredannotationfiles[[i]]
   
   trinity = c()
   annotation = c()
   
-  a5 = dim(a)[1]
+  a5 = dim(uniquepfam[[i]])[1]
   #set length of loop
   
   for (j in seq(1:a5)) {
-    a3 = a[j,1]
+    a3 = uniquepfam[[i]][j,1]
     #grab first unique protein domain entry
     a1 = grepl(a3, filteredannotation$V5)
     a2 = which(a1)
@@ -161,29 +163,27 @@ for (i in seq(1:numberofspecies)) {
   }
   
   annotation = as.data.frame(annotation)
-  annotation = unique(annotation)
-  #unique protein domains
+  #label species
   colnames(annotation) = specieslist[i,]
-  #label species
-  
+  #unique protein domains
+  annotation = unique(annotation)
+
   trinity = as.data.frame(trinity)
-  trinity2 = trinity
-  
-  clean <- gsub("(.*)_.*","\\1",trinity$trinity)
-  trinity$trinity <- clean
-  #remove tail end of transcript label
-  trinity = unique(trinity)
-  #unique transcripts
-  colnames(trinity) = specieslist[i,]
   #label species
+  colnames(trinity) = specieslist[i,]
+  #remove tail end of transcript label
+  clean <- gsub("(.*)_.*","\\1",trinity[,1])
+  trinity[,1] <- clean
+  #unique transcripts
+  trinity = unique(trinity)
   
-  clean <- gsub("(.*)_.*","\\1",trinity2$trinity)
-  trinity2$trinity <- clean
-  clean2 <- gsub("(.*)_.*","\\1",trinity2$trinity)
+  #make a copy
+  trinity2 = trinity
   #remove isoform tag
-  trinity2$trinity <- clean2
+  clean2 <- gsub("(.*)_.*","\\1",trinity2[,1])
+  trinity2[,1] <- clean2
+  #unique isoforms
   trinity2 = unique(trinity2)
-  colnames(trinity2) = specieslist[i,]
   
   #create a list of annotations and transcripts for each species
   ssannotations[specieslist[i,]] <- list(annotation)
@@ -191,25 +191,25 @@ for (i in seq(1:numberofspecies)) {
   sstranscripts[specieslist[i,]] <- list(trinity2)
   
   
-  rm(a, a1, a2, a3, a4, a5, clean, clean2, filteredannotation, annotation, trinity, trinity2)
+  rm(a1, a2, a3, a4, a5, clean, clean2, filteredannotation, annotation, trinity, trinity2)
 }
 
 
 #species-specific information
 #cycle species by changing the number within double brackets
 
-ssannotations[[1]]
 #unique protein domains filtered by e-value
+ssannotations[[1]]
 
-ssisoforms[[1]]
 #transcript isoforms with unique protein domains filtered by e-value
+ssisoforms[[1]]
 
-sstranscripts[[1]]
 #source genes of transcript isoforms with unique protein domains filtered by e-value
+sstranscripts[[1]]
 
 #set working directory to new folder
 for (i in seq(1:numberofspecies)) {
-  write.table(ssannotations[[i]], file = paste0(specieslist[i,], "_Pfam.txt"), col.names = FALSE)
+  write.table(uniquepfam[[i]][,c(1,2)], file = paste0(specieslist[i,], "_Pfam.txt"), col.names = FALSE)
   write.table(ssisoforms[[i]], file = paste0(specieslist[i,], "_i.txt"), col.names = FALSE)
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
   #save

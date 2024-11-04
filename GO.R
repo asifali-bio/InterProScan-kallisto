@@ -131,10 +131,14 @@ uniqueGO = setNames(
          filter(new2, if_all(setdiff(names(new2[,-1]), x), ~is.na(.)))),
   names(new2[,-1]))
 
-#unique GO terms per species
-#corresponding pooled TPM included
-uniqueGO[[1]]
+#unique GO terms per species with pooled TPM
+for (i in seq(1:numberofspecies)) {
+  #remove NA columns
+  uniqueGO[[i]] <- uniqueGO[[i]][,c(1,1+i)]
+}
+
 #cycle species by changing the number within double brackets
+uniqueGO[[1]]
 
 
 ssannotations <- list()
@@ -142,17 +146,15 @@ ssisoforms <- list()
 sstranscripts <- list()
 
 for (i in seq(1:numberofspecies)) {
-  a=uniqueGO[[i]]
   annotationGo = annotationfiles[[i]]
   
   trinity = c()
-  annotation = c()
   
-  a5 = dim(a)[1]
+  a5 = dim(uniqueGO[[i]])[1]
   #set length of loop
   
   for (j in seq(1:a5)) {
-    a3 = a[j,1]
+    a3 = uniqueGO[[i]][j,1]
     #grab first unique GO term entry
     a1 = grepl(a3, annotationGo$V14)
     a2 = which(a1)
@@ -163,31 +165,29 @@ for (i in seq(1:numberofspecies)) {
     #build data frame of transcripts with unique GO terms
   }
   
-  annotation = a[,1]
+  annotation = uniqueGO[[i]][,1]
   annotation = as.data.frame(annotation)
-  annotation = unique(annotation)
   #unique GO terms
+  annotation = unique(annotation)
+  #label species
   colnames(annotation) = specieslist[i,]
-  #label species
-  
+
   trinity = as.data.frame(trinity)
-  trinity2 = trinity
-  
-  clean <- gsub("(.*)_.*","\\1",trinity$trinity)
-  trinity$trinity <- clean
-  #remove tail end of transcript label
-  trinity = unique(trinity)
-  #unique transcripts
-  colnames(trinity) = specieslist[i,]
   #label species
+  colnames(trinity) = specieslist[i,]
+  #remove tail end of transcript label
+  clean <- gsub("(.*)_.*","\\1",trinity[,1])
+  trinity[,1] <- clean
+  #unique transcripts
+  trinity = unique(trinity)
   
-  clean <- gsub("(.*)_.*","\\1",trinity2$trinity)
-  trinity2$trinity <- clean
-  clean2 <- gsub("(.*)_.*","\\1",trinity2$trinity)
+  #make a copy
+  trinity2 = trinity
   #remove isoform tag
-  trinity2$trinity <- clean2
+  clean2 <- gsub("(.*)_.*","\\1",trinity2[,1])
+  trinity2[,1] <- clean2
+  #unique isoforms
   trinity2 = unique(trinity2)
-  colnames(trinity2) = specieslist[i,]
   
   #create a list of annotations and transcripts for each species
   ssannotations[specieslist[i,]] <- list(annotation)
@@ -195,21 +195,21 @@ for (i in seq(1:numberofspecies)) {
   sstranscripts[specieslist[i,]] <- list(trinity2)
   
   
-  rm(a, a1, a2, a3, a4, a5, clean, clean2, annotationGo, annotation, trinity, trinity2)
+  rm(a1, a2, a3, a4, a5, clean, clean2, annotationGo, annotation, trinity, trinity2)
 }
 
 
 #species-specific information
 #cycle species by changing the number within double brackets
 
-ssannotations[[1]]
 #unique GO terms
+ssannotations[[1]]
 
-ssisoforms[[1]]
 #transcript isoforms with unique GO terms
+ssisoforms[[1]]
 
-sstranscripts[[1]]
 #source genes of transcript isoforms with unique GO terms
+sstranscripts[[1]]
 
 #set working directory to new folder
 for (i in seq(1:numberofspecies)) {
