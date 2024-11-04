@@ -19,6 +19,9 @@ annotationlist = paste0("annotation", 1:numberofspecies, ".tsv")
 annotationfiles = lapply(annotationlist, read.delim, header=F)
 
 
+
+#Part A
+
 for (i in seq(1:numberofspecies)) {
   
   justGeneGo<-annotationfiles[[i]][,c(1,14)]
@@ -55,26 +58,26 @@ for (i in seq(1:numberofspecies)) {
   
   colnames(Data)[colnames(Data)=="gene_id"] <- "target_id"
   Data2 = merge(Data, justGeneTPM)
-  Data2 <- Data2[c(2,3)]
   #just GO and TPM
-  Data2 = ddply(Data2, "go_id", numcolwise(sum))
+  Data2 <- Data2[c(2,3)]
   #sum TPM values
-  
+  Data2 = ddply(Data2, "go_id", numcolwise(sum))
+
   Data3 = Data2
   
   colnames(Data3)[colnames(Data3)=="tpm"] <- specieslist[i,]
-  Data2$species <- specieslist[i,]
   #label
-  
+  Data2$species <- specieslist[i,]
+
   if (i==1) {
+    #initialize data
     new2 = Data3
     new = Data2
-    #initialize data
   }
   else {
+    #combine all data
     new2 = merge.data.frame(new2, Data3, all = TRUE)
     new = rbind(new, Data2)
-    #combine all data
   }
   rm(a, eachgene, eachgo, gene, go, gene_id, go_id, simple_counter, justGeneGo, justGeneTPM, Data, Data2, Data3)
 }
@@ -146,23 +149,19 @@ ssisoforms <- list()
 sstranscripts <- list()
 
 for (i in seq(1:numberofspecies)) {
-  annotationGo = annotationfiles[[i]]
   
   trinity = c()
   
-  a5 = dim(uniqueGO[[i]])[1]
-  #set length of loop
-  
-  for (j in seq(1:a5)) {
-    a3 = uniqueGO[[i]][j,1]
+  for (j in seq(1:dim(uniqueGO[[i]])[1])) {
+    a1 = uniqueGO[[i]][j,1]
     #grab first unique GO term entry
-    a1 = grepl(a3, annotationGo$V14)
-    a2 = which(a1)
+    a2 = grepl(a1, annotationfiles[[i]]$V14)
     #locate position of unique GO term
-    a4 = as.character(annotationGo[a2,1])
+    a3 = which(a2)
     #extract transcript ID
-    trinity = c(trinity, a4)
+    a4 = as.character(annotationfiles[[i]][a3,1])
     #build data frame of transcripts with unique GO terms
+    trinity = c(trinity, a4)
   }
   
   annotation = uniqueGO[[i]][,1]
@@ -195,7 +194,7 @@ for (i in seq(1:numberofspecies)) {
   sstranscripts[specieslist[i,]] <- list(trinity2)
   
   
-  rm(a1, a2, a3, a4, a5, clean, clean2, annotationGo, annotation, trinity, trinity2)
+  rm(a1, a2, a3, a4, clean, clean2, annotation, trinity, trinity2)
 }
 
 
@@ -213,11 +212,11 @@ sstranscripts[[1]]
 
 #set working directory to new folder
 for (i in seq(1:numberofspecies)) {
+  #species-specific GO terms
   write.table(ssannotations[[i]], file = paste0(specieslist[i,], "_GO.txt"), col.names = FALSE)
+  #species-specific transcript isoforms
   write.table(ssisoforms[[i]], file = paste0(specieslist[i,], "_i.txt"), col.names = FALSE)
+  #species-specific genes
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
   #save
 }
-#species-specific GO terms
-#species-specific transcript isoforms
-#species-specific genes
