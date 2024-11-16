@@ -127,12 +127,12 @@ uniquepfam = setNames(
          filter(new2, if_all(setdiff(names(new2[,-c(1,2)]), x), ~is.na(.)))),
   names(new2[,-c(1,2)]))
 
-#unique protein domains per species filtered by e-value with pooled TPM
 for (i in seq(1:numberofspecies)) {
   #remove NA columns
   uniquepfam[[i]] <- uniquepfam[[i]][,c(1,2,2+i)]
 }
 
+#unique protein domains per species filtered by e-value with pooled TPM
 #cycle species by changing the number within double brackets
 uniquepfam[[1]]
 
@@ -207,7 +207,10 @@ ssisoforms[[1]]
 #source genes of transcript isoforms with unique protein domains filtered by e-value
 sstranscripts[[1]]
 
+
 #set working directory to new folder
+
+#save
 for (i in seq(1:numberofspecies)) {
   #species-specific Pfam protein domains
   write.table(uniquepfam[[i]][,c(1,2)], file = paste0(specieslist[i,], "_Pfam.txt"), col.names = FALSE)
@@ -215,5 +218,4 @@ for (i in seq(1:numberofspecies)) {
   write.table(ssisoforms[[i]], file = paste0(specieslist[i,], "_i.txt"), col.names = FALSE)
   #species-specific genes
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
-  #save
 }

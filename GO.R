@@ -134,12 +134,12 @@ uniqueGO = setNames(
          filter(new2, if_all(setdiff(names(new2[,-1]), x), ~is.na(.)))),
   names(new2[,-1]))
 
-#unique GO terms per species with pooled TPM
 for (i in seq(1:numberofspecies)) {
   #remove NA columns
   uniqueGO[[i]] <- uniqueGO[[i]][,c(1,1+i)]
 }
 
+#unique GO terms per species with pooled TPM
 #cycle species by changing the number within double brackets
 uniqueGO[[1]]
 
@@ -166,8 +166,6 @@ for (i in seq(1:numberofspecies)) {
   
   annotation = uniqueGO[[i]][,1]
   annotation = as.data.frame(annotation)
-  #unique GO terms
-  annotation = unique(annotation)
   #label species
   colnames(annotation) = specieslist[i,]
 
@@ -210,7 +208,10 @@ ssisoforms[[1]]
 #source genes of transcript isoforms with unique GO terms
 sstranscripts[[1]]
 
+
 #set working directory to new folder
+
+#save
 for (i in seq(1:numberofspecies)) {
   #species-specific GO terms
   write.table(ssannotations[[i]], file = paste0(specieslist[i,], "_GO.txt"), col.names = FALSE)
@@ -218,5 +219,4 @@ for (i in seq(1:numberofspecies)) {
   write.table(ssisoforms[[i]], file = paste0(specieslist[i,], "_i.txt"), col.names = FALSE)
   #species-specific genes
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
-  #save
 }
