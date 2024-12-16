@@ -82,7 +82,7 @@ load("Pfam.RData")
 #automatic scaling
 new3 = as.matrix(new2[,-c(1,2)])
 new3 = new3[complete.cases(new3), ]
-pheatmap(new3, color = colorRampPalette(c("navy", "white", "firebrick3"))(100), scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)
 
 #preview plot
 ggplot(new, aes(species, pfam)) +
