@@ -23,12 +23,12 @@ annotationfiles = lapply(annotationlist, read.delim, header=F)
 #Part A
 
 #set e-value for Pfam protein domain match
-evalue = 0
+evalue = 0.05
 
-#remove Pfam protein domain annotations less than or equal to e-value
+#remove Pfam protein domain annotations greater than e-value
 filteredannotationfiles <- list()
 for (i in seq(1:numberofspecies)) {
-  filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 >= evalue),]
+  filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 > evalue),]
   filteredannotationfiles[specieslist[i,]] <- list(filteredannotation)
 }
 
@@ -78,11 +78,6 @@ for (i in seq(1:numberofspecies)) {
 #table of pooled Pfam protein domains per species filtered by e-value
 save(new, new2, file = "Pfam.RData")
 load("Pfam.RData")
-
-#automatic scaling
-new3 = as.matrix(new2[,-c(1,2)])
-new3 = new3[complete.cases(new3), ]
-pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)
 
 #preview plot
 ggplot(new, aes(species, pfam)) +
@@ -219,3 +214,13 @@ for (i in seq(1:numberofspecies)) {
   #species-specific genes
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
 }
+
+
+
+#Part C
+#evolutionary distance based on clustering
+
+#automatic scaling
+new3 = as.matrix(new2[,-c(1,2)])
+new3 = new3[complete.cases(new3), ]
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)

@@ -86,42 +86,6 @@ for (i in seq(1:numberofspecies)) {
 save(new, new2, file = "GO.RData")
 load("GO.RData")
 
-
-#plots
-
-uniqueGO = setNames(
-  lapply(names(new2[,-1]), \(x)
-         filter(new2, if_all(setdiff(names(new2[,-1]), x), ~is.na(.)))),
-  names(new2[,-1]))
-
-for (i in seq(1:numberofspecies)) {
-  #remove NA columns
-  uniqueGO[[i]] <- uniqueGO[[i]][,c(1,1+i)]
-}
-
-remove = c()
-
-for (i in seq(1:numberofspecies)) {
-  for (j in seq(1:dim(uniqueGO[[i]])[1])) {
-    a1 = as.character(uniqueGO[[i]][j,1])
-    #build list for removal
-    remove = c(remove, a1)
-  }
-  rm(a1)
-}
-
-new3 = new2
-new3 = new3[!new3$go_id %in% remove,]
-new3 = new3[,-1]
-#new3 = new3[complete.cases(new3), ]
-pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
-
-new3 = new2
-new3 = new3[,-1]
-new3[is.na(new3)] = 0
-pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
-
-
 #preview plot
 ggplot(new, aes(species, go_id)) +
   geom_point(aes(color = go_id, size = tpm), alpha = 0.3, show.legend = FALSE) +
@@ -251,3 +215,38 @@ for (i in seq(1:numberofspecies)) {
   #species-specific genes
   write.table(sstranscripts[[i]], file = paste0(specieslist[i,], "_g.txt"), col.names = FALSE)
 }
+
+
+
+#Part C
+#evolutionary distance based on clustering
+
+remove = c()
+#unique GO terms are irrelevant for clustering
+
+for (i in seq(1:numberofspecies)) {
+  for (j in seq(1:dim(uniqueGO[[i]])[1])) {
+    a1 = as.character(uniqueGO[[i]][j,1])
+    #build list of unique GO terms for removal
+    remove = c(remove, a1)
+  }
+  rm(a1)
+}
+
+#remove unique GO terms
+new3 = new2
+new3 = new3[!new3$go_id %in% remove,]
+new3 = new3[,-1]
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
+
+#only complete cases for clustering species and GO terms
+new3 = new2
+new3 = new3[complete.cases(new3), ]
+new3 = new3[,-1]
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
+
+#set NA to 0 for clustering species and GO terms
+new3 = new2
+new3[is.na(new3)] = 0
+new3 = new3[,-1]
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
