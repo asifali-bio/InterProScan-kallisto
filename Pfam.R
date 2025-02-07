@@ -131,7 +131,7 @@ for (i in seq(1:numberofspecies)) {
 #cycle species by changing the number within double brackets
 uniquepfam[[1]]
 
-
+#to generate output files
 ssannotations <- list()
 ssisoforms <- list()
 sstranscripts <- list()

@@ -138,7 +138,7 @@ for (i in seq(1:numberofspecies)) {
 #cycle species by changing the number within double brackets
 uniqueGO[[1]]
 
-
+#to generate output files
 ssannotations <- list()
 ssisoforms <- list()
 sstranscripts <- list()
@@ -221,32 +221,41 @@ for (i in seq(1:numberofspecies)) {
 #Part C
 #evolutionary distance based on clustering
 
+#1
 remove = c()
-#unique GO terms are irrelevant for clustering
-
 for (i in seq(1:numberofspecies)) {
   for (j in seq(1:dim(uniqueGO[[i]])[1])) {
     a1 = as.character(uniqueGO[[i]][j,1])
-    #build list of unique GO terms for removal
     remove = c(remove, a1)
   }
   rm(a1)
 }
-
-#remove unique GO terms
 new3 = new2
 new3 = new3[!new3$go_id %in% remove,]
 new3 = new3[,-1]
+#remove species-specific GO terms
 pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
 
-#only complete cases for clustering species and GO terms
+#2
 new3 = new2
 new3 = new3[complete.cases(new3), ]
 new3 = new3[,-1]
+#only complete cases
 pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
 
-#set NA to 0 for clustering species and GO terms
+#3
 new3 = new2
+#set NA to 0
 new3[is.na(new3)] = 0
+rownames(new3) = new3[,1]
 new3 = new3[,-1]
-pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
+#calculate distance matrix
+d = dist(new3, method = "euclidean")
+hc = hclust(d, method = "ward.D2")
+order = hc$labels[hc$order]
+#rearrange data
+new4 = new2 %>%
+  slice(match(order, go_id))
+new4 = new4[,-1]
+#plot NA values as NA
+pheatmap(new4, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
