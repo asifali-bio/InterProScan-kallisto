@@ -251,7 +251,8 @@ hc = hclust(d, method = "complete")
 order = hc$labels[hc$order]
 #rearrange data
 new4 = new2 %>%
-  slice(match(order, go_id))
+  arrange(factor(go_id, levels = order))
+rownames(new4) = new4[,1]
 new4 = new4[,-1]
 #plot NA values as NA
 pheatmap(new4, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
