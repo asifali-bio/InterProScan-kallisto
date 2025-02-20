@@ -25,11 +25,12 @@ annotationfiles = lapply(annotationlist, read.delim, header=F)
 #set e-value for Pfam protein domain match
 evalue = 0.05
 
-#remove Pfam protein domain annotations greater than e-value
+#select Pfam protein domain annotations less than specified e-value
 filteredannotationfiles <- list()
 for (i in seq(1:numberofspecies)) {
-  filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 > evalue),]
+  filteredannotation = annotationfiles[[i]][which(annotationfiles[[i]]$V9 < evalue),]
   filteredannotationfiles[specieslist[i,]] <- list(filteredannotation)
+  rm(filteredannotation)
 }
 
 #cycle species by changing the number within double brackets
@@ -220,7 +221,37 @@ for (i in seq(1:numberofspecies)) {
 #Part C
 #evolutionary distance based on clustering
 
-#automatic scaling
-new3 = as.matrix(new2[,-c(1,2)])
+#1
+#cluster by species
+new3 = new2
+rownames(new3) = new3[,1]
+new3 = new3[,-c(1,2)]
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
+
+#2
+#cluster by species and annotation
+new3 = new2
+rownames(new3) = new3[,1]
+new3 = new3[,-c(1,2)]
+#only complete cases
 new3 = new3[complete.cases(new3), ]
-pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE)
+pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
+
+#3
+#cluster by species and annotation
+new3 = new2
+rownames(new3) = new3[,1]
+new3 = new3[,-c(1,2)]
+#set NA to 0
+new3[is.na(new3)] = 0
+#calculate distance matrix
+d = dist(new3, method = "euclidean")
+#cluster
+hc = hclust(d, method = "complete")
+order = hc$labels[hc$order]
+#rearrange data
+new4 = new2 %>%
+  slice(match(order, pfam))
+new4 = new4[,-c(1,2)]
+#plot NA values as NA
+pheatmap(new4, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")

@@ -222,36 +222,32 @@ for (i in seq(1:numberofspecies)) {
 #evolutionary distance based on clustering
 
 #1
-remove = c()
-for (i in seq(1:numberofspecies)) {
-  for (j in seq(1:dim(uniqueGO[[i]])[1])) {
-    a1 = as.character(uniqueGO[[i]][j,1])
-    remove = c(remove, a1)
-  }
-  rm(a1)
-}
+#cluster by species
 new3 = new2
-new3 = new3[!new3$go_id %in% remove,]
+rownames(new3) = new3[,1]
 new3 = new3[,-1]
-#remove species-specific GO terms
 pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = FALSE, show_rownames = FALSE, na_col = "black")
 
 #2
+#cluster by species and annotation
 new3 = new2
-new3 = new3[complete.cases(new3), ]
+rownames(new3) = new3[,1]
 new3 = new3[,-1]
 #only complete cases
+new3 = new3[complete.cases(new3), ]
 pheatmap(new3, scale = "row", treeheight_row = 0, cluster_cols = TRUE, cluster_rows = TRUE, show_rownames = FALSE)
 
 #3
+#cluster by species and annotation
 new3 = new2
-#set NA to 0
-new3[is.na(new3)] = 0
 rownames(new3) = new3[,1]
 new3 = new3[,-1]
+#set NA to 0
+new3[is.na(new3)] = 0
 #calculate distance matrix
 d = dist(new3, method = "euclidean")
-hc = hclust(d, method = "ward.D2")
+#cluster
+hc = hclust(d, method = "complete")
 order = hc$labels[hc$order]
 #rearrange data
 new4 = new2 %>%
