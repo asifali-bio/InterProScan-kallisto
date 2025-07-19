@@ -1,8 +1,8 @@
-**Functional genomics and comparative systems biology**
+**Functional Genomics and Comparative Systems Biology**
 
 
 
-This pipeline allows for de novo RNA-seq analysis across different species using structural annotation and expression quantification. Reads were assembled via Trinity. Then, protein domains were predicted and gene expression was estimated via InterProScan and kallisto, respectively. Once we have the output files from InterProScan and kallisto, we use R to merge the GO/Pfam annotations with the abundance information to obtain a distribution of annotations. The R code contained in this repository assumes that both InterProScan and kallisto output files are ready to be processed and used as input files.
+This pipeline allows for de novo RNA-seq analysis across different species by merging structural annotation with expression quantification. Reads were assembled via Trinity. Then, protein domains were predicted and gene expression was estimated via InterProScan and kallisto, respectively. Once we have the output files from InterProScan and kallisto, we use R to merge the GO/Pfam annotations with the abundance information to obtain a distribution of annotations. The R code contained in this repository assumes that both InterProScan and kallisto output files are ready to be processed and used as input files.
 
 
 
