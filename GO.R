@@ -3,6 +3,7 @@ library(dplyr)
 library(pheatmap)
 library(ggplot2)
 library(plotly)
+library(vegan)
 library(viridis)
 
 
@@ -245,9 +246,9 @@ new3 = new3[,-1]
 #set NA to 0
 new3[is.na(new3)] = 0
 #calculate distance matrix
-d = dist(new3, method = "euclidean")
+d = vegdist(new3, method = "bray")
 #cluster
-hc = hclust(d, method = "complete")
+hc = hclust(d, method = "average")
 order = hc$labels[hc$order]
 #rearrange data
 new4 = new2 %>%
