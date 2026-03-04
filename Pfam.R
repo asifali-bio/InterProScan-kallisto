@@ -246,7 +246,7 @@ new3 = new3[,-c(1,2)]
 #set NA to 0
 new3[is.na(new3)] = 0
 #calculate distance matrix
-d = vegdist(new3, method = "bray")
+d = vegdist(t(new3), method = "bray")
 #cluster
 hc = hclust(d, method = "average")
 order = hc$labels[hc$order]
